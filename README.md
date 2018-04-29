@@ -2,5 +2,5 @@
 
 .gbファイルをダウンロードして、[このサイト](https://torch2424.github.io/wasmBoy/)で実行することができます。
 
-最新のバージョンを起動すると平仮名「あいうえお」が表示されます：
-![スクショ](https://i.imgur.com/XWLolV4.png)
+最新のバージョンを起動すると平仮名「こう　です」が表示されます：
+![スクリーンショット](https://i.imgur.com/uxi1knd.png)
