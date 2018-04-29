@@ -28,8 +28,9 @@ main:
 	call	load_tiles
 	call	clear_lcd
 
+	ld	bc, $08
 	ld	de, aiueo_screen
-	call write_out
+	call 	write_out
 
 ; 無限ループ
 loop:
@@ -40,7 +41,6 @@ loop:
 write_out: 
 	; $C000にある文字列を表示する
 	call 	lcd_off
-	ld	bc, 32*32
 	ld	hl, $9800
 	call 	memcpy
 	ld	a, %10010001
