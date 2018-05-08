@@ -33,7 +33,7 @@ main:
 	ld	[$FE00], a
 	ld	a, 30
 	ld	[$FE01], a
-	ld	a, 1
+	ld	a, 11
 	ld	[$FE02], a
 	ld	a, 0
 	ld	[$FE03], a
@@ -41,13 +41,33 @@ main:
 
 ; 無限ループ
 loop:
-	halt
 	nop
+	call	lcd_on
+	call	timer
+	call	lcd_off
+	ld	a, [$FE02]
+	cp	11
+	jp	z, .change
+	ld	a, 11
+	ld	[$FE02], a
 	jp	loop
+.change
+	ld	a, 12
+	ld	[$FE02], a
+	jp	loop
+
+timer:
+	ld	de, $FFFF
+.loop
+	dec	de
+	ld	a, d
+	or	e
+	jr	nz, .loop
+	ret
 
 load_tiles:
 	call	lcd_off
-	ld	bc, 16*11
+	ld	bc, 16*13
 	ld	de, $4000
 	ld	hl, $8000
 	call	memcpy
@@ -115,6 +135,7 @@ SECTION "Tiles", ROMX ; $4000
 	db $00, $00, $0A, $0A, $20, $20, $50, $50, $88, $88, $06, $06, $00, $00, $00, $00 ; べ
 	db $00, $00, $0E, $0E, $74, $74, $0A, $0A, $10, $10, $10, $10, $08, $08, $06, $06 ; で
 	db $00, $00, $08, $08, $FE, $FE, $18, $18, $28, $28, $18, $18, $08, $08, $10, $10 ; す
-
+	db $18, $18, $3C, $3C, $7E, $7E, $DB, $DB, $FF, $FF, $24, $24, $5A, $5A, $A5, $A5 ; monster3
+	db $18, $18, $3C, $3C, $7E, $7E, $DB, $DB, $FF, $FF, $5A, $5A, $81, $81, $42, $42 ; monster4
 aiueo_screen:
 	db	$01, $02, $03, $04, $05, $00, $09, $0A ; あいうえお　です
