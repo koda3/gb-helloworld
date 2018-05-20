@@ -1,5 +1,5 @@
 timer:
-	ld	de, $FFFF
+	ld	de, $7FFF
 .loop
 	dec	de
 	ld	a, d
@@ -9,7 +9,7 @@ timer:
 
 load_tiles:
 	call	lcd_off
-	ld	bc, 16*13
+	ld	bc, 16*32
 	ld	de, $4000
 	ld	hl, $8000
 	call	memcpy
