@@ -7,26 +7,17 @@ timer:
 	jr	nz, .loop
 	ret
 
-load_tiles:
-	call	lcd_off
+clear_vram:
 	ld	bc, 16*32
-	ld	de, $4000
-	ld	hl, $8000
-	call	memcpy
+	ld 	de, $9800
+	call	zero
 	ret
 
-clear_lcd:
-	ld 	hl, $9800
-	ld	de, 32*32
-.loop:
-	ld	a, 0
-	ld	[hl], a
-	dec	de
-	ld	a, d
-	or	e
-	ret	z
-	inc	hl
-	jp	.loop
+clear_oam:
+	ld	bc, 4*40
+	ld 	de, $FE00
+	call	zero
+	ret
 
 lcd_off:
 	; LCDがオフなら抜ける
@@ -59,6 +50,19 @@ memcpy:
 	ld	[hl], a
 	inc	de
 	inc 	hl
+	dec	bc
+	ld	a, b
+	or	c
+	jp	nz, .loop
+	ret
+
+zero:
+	; bc サイズ
+	; de コピー元のメモリポインター
+.loop:
+	ld	a, 0
+	ld	[de], a
+	inc	de
 	dec	bc
 	ld	a, b
 	or	c
