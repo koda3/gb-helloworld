@@ -11,16 +11,29 @@ main:
 	ld	[$FF42], a ; スクロールX座標
 	ld	[$FF43], a ; スクロールY座標
 
-	call	lcd_off
-	call	clear_vram
-	call	clear_oam
+	call	wait_vblank
 
-	; タイルを読み込む
-	ld	bc, 16*16
-	ld	de, Tiles
-	ld	hl, $8000
-	call	memcpy
+        ; 画面をオフにする
+	ld      a, %00010011
+        ld      [$FF40], a
+	
+        ; VRAMをクリア
+        ld      bc, 8191
+        ld      de, $8000
+        call    zero
 
+        ; OAMをクリア
+        ld      bc, 4*40
+        ld      de, $FE00
+        call    zero
+
+        ; タイルテーブルを書き込み
+        ld      bc, 16*32
+        ld      de, Tiles
+        ld      hl, $8000
+        call    memcpy
+
+	; タイルとスプライトを表示
 	ld	a, 01
 	ld	[$9803+32*1], a
 	ld	a, 02
@@ -40,7 +53,10 @@ main:
 	ld	a, 0
 	ld	[$FE03], a
 
-	call	lcd_on
+        ; 画面をオフにする
+	ld      a, %10010011
+        ld      [$FF40], a
+
 
 ; 無限ループ
 loop:

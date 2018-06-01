@@ -8,7 +8,7 @@ timer:
 	ret
 
 clear_vram:
-	ld	bc, 16*32
+	ld	bc, 8192
 	ld 	de, $9800
 	call	zero
 	ret
@@ -36,6 +36,13 @@ lcd_off:
 	ld	[$FF40], a
 	ret
 
+wait_vblank
+	; LCDが書き込み終わるまでループします
+	ld	a, [$FF44]	; LCDC Y座標
+	cp	$91
+	jr	nz, wait_vblank
+	ret
+
 lcd_on:
 	ld	a, %10010011
 	ld	[$FF40], a
@@ -58,7 +65,7 @@ memcpy:
 
 zero:
 	; bc サイズ
-	; de コピー元のメモリポインター
+	; de コピー先のメモリポインター
 .loop:
 	ld	a, 0
 	ld	[de], a
