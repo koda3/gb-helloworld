@@ -1,6 +1,6 @@
 timer:
 	ld	de, $7FFF
-.loop
+.loop:
 	dec	de
 	ld	a, d
 	or	e
@@ -19,28 +19,24 @@ clear_oam:
 	call	zero
 	ret
 
-lcd_off:
-	; LCDがオフなら抜ける
-	ld	a, [$FF44]	; LCDC Y座標
-	rlca
-	ret	nc
-.wait_vblank
-	; LCDが書き込み終わるまでループします
-	ld	a, [$FF44]	; LCDC Y座標
-	cp	$91
-	jr	nz, .wait_vblank
-
-	; LCDをオフにします
-	ld	a, [$FF40]	; LCD制御
-	res	$07, a		; ７ビット目をリセット(０にされる)
-	ld	[$FF40], a
-	ret
-
-wait_vblank
+wait_vblank:
 	; LCDが書き込み終わるまでループします
 	ld	a, [$FF44]	; LCDC Y座標
 	cp	$91
 	jr	nz, wait_vblank
+	ret
+
+lcd_off:
+	; LCDが既にオフなら抜ける
+	ld	a, [$FF44]	; LCDC Y座標
+	rlca
+	ret	nc
+
+	call wait_vblank
+
+	; LCDをオフにします
+	ld	a, %00010011
+	ld	[$FF40], a
 	ret
 
 lcd_on:
@@ -48,7 +44,7 @@ lcd_on:
 	ld	[$FF40], a
 	ret
 
-memcpy: 
+memcpy:
 	; bc コピーサイズ
 	; de コピー元のメモリポインター
 	; hl コピー先のメモリポインター
@@ -74,4 +70,30 @@ zero:
 	ld	a, b
 	or	c
 	jp	nz, .loop
+	ret
+
+lcd_reset:
+	call	wait_vblank
+	call	lcd_off
+
+	; VRAMをクリア
+	ld	bc, 8191
+	ld	de, $8000
+	call	zero
+
+	; 背景マップをクリア
+	ld	bc, 2047
+	ld	de, $9800
+	call	zero
+
+	; OAMをクリア
+	ld	bc, 4*40
+	ld	de, $FE00
+	call	zero
+
+	; タイルテーブルを書き込み
+	ld	bc, 16*32
+	ld	de, Tiles
+	ld	hl, $8000
+	call	memcpy
 	ret
