@@ -97,3 +97,29 @@ lcd_reset:
 	ld	hl, $8000
 	call	memcpy
 	ret
+
+get_dpad: ; 方向キーを読み込む
+	; P14をHIGHにして、P15をLOWにする
+	ld	a, %00100000
+	ld	[$FF00], a
+
+	; コントローラ読み込み
+	ld	a, [$FF00]
+	ld	a, [$FF00]
+	ld	a, [$FF00]
+	ld	a, [$FF00]
+	ld	b, a
+	ret
+
+get_btn: ; ボタンを読み込む
+	; P14をHIGHにして、P15をLOWにする
+	ld	a, %00010000
+	ld	[$FF00], a
+
+	; コントローラ読み込み
+	ld	a, [$FF00]
+	ld	a, [$FF00]
+	ld	a, [$FF00]
+	ld	a, [$FF00]
+	ld	b, a
+	ret

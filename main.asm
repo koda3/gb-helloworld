@@ -32,28 +32,19 @@ sentaku_gamen:
 	ld	[$FE00], a
 	ld	a, 8+16
 	ld	[$FE01], a
-	ld	a, 13
+	ld	a, 11
 	ld	[$FE02], a ; 矢印
 	ld	a, 0
 	ld	[$FE03], a
 
 	call	lcd_on
-	ld	bc, 1
-	push	bc ; 選択したタイル
+	ld	a, 01
+	ld	[sentaku], a ; 選択したタイル
 .loop:
-	; P14をHIGHにして、P15をLOWにする
-	ld	a, %00100000
-	ld	[$FF00], a
-
-	; コントローラ読み込み
-	ld	a, [$FF00]
-	ld	a, [$FF00]
-	ld	a, [$FF00]
-	ld	a, [$FF00]
-	ld	b, a
 	call	wait_vblank
 
 	; 方向キー
+	call	get_dpad
 	ld	a, b
 	and	%00000100
 	jr	z, .ue_botan
@@ -61,21 +52,11 @@ sentaku_gamen:
 	and	a, %00001000
 	jr	z, .shita_botan
 
-	; A・B・スタート・セレクトボタン
-	ld	a, %00010000
-	ld	[$FF00], a
-
-	ld	a, [$FF00]
-	ld	a, [$FF00]
-	ld	a, [$FF00]
-	ld	a, [$FF00]
-	ld	b, a
-	call	wait_vblank
-
+	; ボタン
+	call	get_btn
 	ld	a, b
 	and	%00000001
 	jr	z, .a_botan
-
 	jr	.loop
 .ue_botan:
 	ld	a, [$FE00]
@@ -84,9 +65,9 @@ sentaku_gamen:
 	ld	a, [$FE00]
 	sub	a, 8
 	ld	[$FE00], a
-	pop	bc
-	dec	bc
-	push	bc
+	ld	a, [sentaku]
+	dec	a
+	ld	[sentaku], a
 	jr	.end_loop
 .shita_botan:
 	ld	a, [$FE00]
@@ -95,12 +76,11 @@ sentaku_gamen:
 	ld	a, [$FE00]
 	add	a, 8
 	ld	[$FE00], a
-	pop	bc
-	inc	bc
-	push	bc
+	ld	a, [sentaku]
+	inc	a
+	ld	[sentaku], a
 	jr	.end_loop
 .a_botan:
-	pop	bc
 	jp	hyouji_gamen
 .end_loop:
 	call	timer
@@ -109,24 +89,14 @@ sentaku_gamen:
 
 hyouji_gamen:
 	; 呼ぶ前に表示するタイルはcに保存された
-	push	bc
 	call	lcd_reset
-	pop	bc
-	ld	a, c
+	ld	a, [sentaku]
 	ld	[$9803+32*1], a ; 背景マップ
 	call	lcd_on
 .loop:
-	; A・B・スタート・セレクトボタン
-	ld	a, %00010000
-	ld	[$FF00], a
-
-	ld	a, [$FF00]
-	ld	a, [$FF00]
-	ld	a, [$FF00]
-	ld	a, [$FF00]
-	ld	b, a
 	call	wait_vblank
 
+	call	get_btn
 	ld	a, b
 	and	%00000010
 	jr	z, .b_botan
@@ -141,8 +111,4 @@ hyouji_gamen:
 
 loop:
 	jp	sentaku_gamen
-	call	timer
-	call	timer
-	ld	bc, 01
-	call	hyouji_gamen
 	halt
